@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>マルチ30分タイマー</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .timer-card {
+      border-radius: 24px;
+      padding: 20px;
+      color: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transition: 0.3s;
+    }
+
+    .timer-title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+
+    .time {
+      font-size: 48px;
+      text-align: center;
+      margin-bottom: 24px;
+      font-weight: bold;
+    }
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+      transform: scale(1.02);
+    }
+
+    .five-btn {
+      background: rgba(255,255,255,0.85);
+    }
+
+    .clear-btn {
+      background: rgba(0,0,0,0.7);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="grid" id="timerGrid"></div>
+
+  <script>
+    const INITIAL_SECONDS = 30 * 60;
+    const timers = [];
+
+    function getStartButtonColor(index) {
+      if (index <= 5) return '#FF5D52';
+      if (index <= 9) return '#FFA703';
+      if (index <= 14) return '#4CAF50';
+      return '#3143FF';
+    }
+
+    function getTimerColor(timer) {
+      if (!timer.running && timer.seconds === INITIAL_SECONDS) {
+        return '#4AB3E0';
+      }
+
+      if (timer.seconds < 0) {
+        return '#E10F0F';
+      }
+
+      if (timer.seconds <= 360 && !timer.acknowledged) {
+        return '#FFE11E';
+      }
+
+      return '#9E9E9E';
+    }
+
+    function formatTime(seconds) {
+      const abs = Math.abs(seconds);
+      const mins = String(Math.floor(abs / 60)).padStart(2, '0');
+      const secs = String(abs % 60).padStart(2, '0');
+
+      return seconds < 0
+        ? `-${mins}:${secs}`
+        : `${mins}:${secs}`;
+    }
+
+    function createTimers() {
+      const grid = document.getElementById('timerGrid');
+
+      for (let i = 1; i <= 17; i++) {
+        const timer = {
+          id: i,
+          seconds: INITIAL_SECONDS,
+          running: false,
+          acknowledged: false,
+        };
+
+        timers.push(timer);
+
+        const card = document.createElement('div');
+        card.className = 'timer-card';
+        card.id = `card-${i}`;
+
+        card.innerHTML = `
+          <div class="timer-title">No.${i}</div>
+          <div class="time" id="time-${i}">30:00</div>
+
+          <div class="buttons">
+            <button
+              id="start-${i}"
+              style="background:${getStartButtonColor(i)}; color:white;"
+            >
+              ${i}
+            </button>
+
+            <button class="five-btn" id="five-${i}">
+              5分
+            </button>
+
+            <button class="clear-btn" id="clear-${i}">
+              クリア
+            </button>
+          </div>
+        `;
+
+        grid.appendChild(card);
+
+        document.getElementById(`start-${i}`).onclick = () => {
+          timer.running = true;
+        };
+
+        document.getElementById(`five-${i}`).onclick = () => {
+          timer.acknowledged = true;
+          updateCard(timer);
+        };
+
+        document.getElementById(`clear-${i}`).onclick = () => {
+          timer.running = false;
+          timer.seconds = INITIAL_SECONDS;
+          timer.acknowledged = false;
+          updateCard(timer);
+        };
+
+        updateCard(timer);
+      }
+    }
+
+    function updateCard(timer) {
+      const card = document.getElementById(`card-${timer.id}`);
+      const time = document.getElementById(`time-${timer.id}`);
+
+      card.style.background = getTimerColor(timer);
+      time.textContent = formatTime(timer.seconds);
+    }
+
+    setInterval(() => {
+      timers.forEach(timer => {
+        if (timer.running) {
+          timer.seconds--;
+          updateCard(timer);
+        }
+      });
+    }, 1000);
+
+    createTimers();
+  </script>
+
+</body>
+</html>
