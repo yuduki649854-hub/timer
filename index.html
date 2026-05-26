@@ -91,11 +91,11 @@
         return '#4AB3E0';
       }
 
-      if (timer.seconds < 0) {
+      if (timer.seconds < 60) {
         return '#E10F0F';
       }
 
-      if (timer.seconds <= 300 && !timer.acknowledged) {
+      if (timer.seconds <= 360 && !timer.acknowledged) {
         return '#FFE11E';
       }
 
