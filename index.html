@@ -95,7 +95,7 @@
         return '#E10F0F';
       }
 
-      if (timer.seconds <= 360 && !timer.acknowledged) {
+      if (timer.seconds <= 300 && !timer.acknowledged) {
         return '#FFE11E';
       }
 
@@ -121,6 +121,7 @@
           seconds: INITIAL_SECONDS,
           running: false,
           acknowledged: false,
+          startedAt: null,
         };
 
         timers.push(timer);
@@ -130,7 +131,7 @@
         card.id = `card-${i}`;
 
         card.innerHTML = `
-          <div class="timer-title">No.${i}</div>
+          <div class="timer-title">タイマー ${i}</div>
           <div class="time" id="time-${i}">30:00</div>
 
           <div class="buttons">
@@ -155,6 +156,10 @@
 
         document.getElementById(`start-${i}`).onclick = () => {
           timer.running = true;
+          if (!timer.startedAt) {
+            timer.startedAt = Date.now();
+          }
+          updateCard(timer);
         };
 
         document.getElementById(`five-${i}`).onclick = () => {
@@ -166,6 +171,7 @@
           timer.running = false;
           timer.seconds = INITIAL_SECONDS;
           timer.acknowledged = false;
+          timer.startedAt = null;
           updateCard(timer);
         };
 
@@ -176,9 +182,45 @@
     function updateCard(timer) {
       const card = document.getElementById(`card-${timer.id}`);
       const time = document.getElementById(`time-${timer.id}`);
+      const grid = document.getElementById('timerGrid');
 
       card.style.background = getTimerColor(timer);
       time.textContent = formatTime(timer.seconds);
+
+      // タイマーを並び替え
+      const cards = Array.from(document.querySelectorAll('.timer-card'));
+
+      const runningCards = cards.filter(c => {
+        const id = Number(c.id.replace('card-', ''));
+        const t = timers.find(timer => timer.id === id);
+        return t.running;
+      });
+
+      const stoppedCards = cards.filter(c => {
+        const id = Number(c.id.replace('card-', ''));
+        const t = timers.find(timer => timer.id === id);
+        return !t.running;
+      });
+
+      runningCards.sort((a, b) => {
+        const aId = Number(a.id.replace('card-', ''));
+        const bId = Number(b.id.replace('card-', ''));
+
+        const aTimer = timers.find(timer => timer.id === aId);
+        const bTimer = timers.find(timer => timer.id === bId);
+
+        return aTimer.startedAt - bTimer.startedAt;
+      });
+
+      stoppedCards.sort((a, b) => {
+        const aId = Number(a.id.replace('card-', ''));
+        const bId = Number(b.id.replace('card-', ''));
+        return aId - bId;
+      });
+
+      [...runningCards, ...stoppedCards].forEach(c => {
+        grid.appendChild(c);
+      });
     }
 
     setInterval(() => {
