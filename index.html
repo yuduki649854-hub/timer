@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes"> 
   <title>30分タイマー</title>
 
   <style>
@@ -15,6 +15,11 @@
       padding: 20px;
       font-family: Arial, sans-serif;
       background: #f3f4f6;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 24px;
     }
 
     .grid {
@@ -77,6 +82,8 @@
 </head>
 <body>
 
+  <h1>マルチ30分タイマー</h1>
+
   <div class="grid" id="timerGrid"></div>
 
   <script>
@@ -95,11 +102,11 @@
         return '#4AB3E0';
       }
 
-      if (timer.seconds < 60) {
+      if (timer.seconds < 0) {
         return '#E10F0F';
       }
 
-      if (timer.seconds <= 360 && !timer.acknowledged) {
+      if (timer.seconds <= 300 && !timer.acknowledged) {
         return '#FFE11E';
       }
 
@@ -120,6 +127,58 @@
       const grid = document.getElementById('timerGrid');
 
       for (let i = 1; i <= 17; i++) {
+        const timer = {
+          id: i,
+          seconds: INITIAL_SECONDS,
+          running: false,
+          acknowledged: false,
+          startedAt: null,
+        };
+
+        timers.push(timer);
+
+        const card = document.createElement('div');
+        card.className = 'timer-card';
+        card.id = `card-${i}`;
+
+        card.innerHTML = `
+          <div class="timer-title">タイマー ${i}</div>
+          <div class="time" id="time-${i}">30:00</div>
+
+          <div class="buttons">
+            <button
+              id="start-${i}"
+              style="background:${getStartButtonColor(i)}; color:white;"
+            >
+              ${i}
+            </button>
+
+            <button class="five-btn" id="five-${i}">
+              5分
+            </button>
+
+            <button class="clear-btn" id="clear-${i}">
+              クリア
+            </button>
+          </div>
+        `;
+
+        grid.appendChild(card);
+
+        document.getElementById(`start-${i}`).onclick = () => {
+          timer.running = true;
+          if (!timer.startedAt) {
+            timer.startedAt = Date.now();
+          }
+          updateCard(timer);
+        };
+
+        document.getElementById(`five-${i}`).onclick = () => {
+          timer.acknowledged = true;
+          updateCard(timer);
+        };
+
+        document.getElementById(`clear-${i}`).onclick = () => {
           timer.running = false;
           timer.seconds = INITIAL_SECONDS;
           timer.acknowledged = false;
