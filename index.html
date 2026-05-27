@@ -15,11 +15,6 @@
       background: #f3f4f6;
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -80,8 +75,6 @@
 </head>
 <body>
 
-  <h1>マルチ30分タイマー</h1>
-
   <div class="grid" id="timerGrid"></div>
 
   <script>
@@ -140,7 +133,7 @@
         card.id = `card-${i}`;
 
         card.innerHTML = `
-          <div class="timer-title">タイマー ${i}</div>
+          <div class="timer-title">No. ${i}</div>
           <div class="time" id="time-${i}">30:00</div>
 
           <div class="buttons">
